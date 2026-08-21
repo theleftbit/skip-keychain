@@ -1,9 +1,11 @@
 import XCTest
-import OSLog
 import Foundation
 @testable import SkipKeychain
+#if SKIP || canImport(OSLog)
+import OSLog
 
 let logger: Logger = Logger(subsystem: "test", category: "SkipKeychainTests")
+#endif
 
 final class SkipKeychainTests: XCTestCase {
 
@@ -11,6 +13,7 @@ final class SkipKeychainTests: XCTestCase {
         let key = "SkipKeychainTestsStringKey"
         try skipRoboelectric()
         try skipiOSSimulator()
+        try skipNoKeychainPlatform()
         let keychain = Keychain.shared
         try keychain.removeValue(forKey: key)
         try XCTAssertNil(keychain.string(forKey: key))
@@ -22,6 +25,7 @@ final class SkipKeychainTests: XCTestCase {
         let key = "SkipKeychainTestsUpdateKey"
         try skipRoboelectric()
         try skipiOSSimulator()
+        try skipNoKeychainPlatform()
         let keychain = Keychain.shared
         try keychain.removeValue(forKey: key)
         try keychain.set("value", forKey: key)
@@ -34,6 +38,7 @@ final class SkipKeychainTests: XCTestCase {
         let key = "SkipKeychainTestsValueForKey"
         try skipRoboelectric()
         try skipiOSSimulator()
+        try skipNoKeychainPlatform()
         let keychain = Keychain.shared
         try keychain.removeValue(forKey: key)
         try keychain.removeValue(forKey: "nonexistantkey")
@@ -47,6 +52,7 @@ final class SkipKeychainTests: XCTestCase {
         let key = "SkipKeychainTestsKey"
         try skipRoboelectric()
         try skipiOSSimulator()
+        try skipNoKeychainPlatform()
         let keychain = Keychain.shared
         try keychain.removeValue(forKey: key)
         try XCTAssertFalse(keychain.keys().contains(key))
@@ -58,6 +64,7 @@ final class SkipKeychainTests: XCTestCase {
         let key = "SkipKeychainTestsBoolKey"
         try skipRoboelectric()
         try skipiOSSimulator()
+        try skipNoKeychainPlatform()
         let keychain = Keychain.shared
         try keychain.removeValue(forKey: key)
         try XCTAssertNil(keychain.bool(forKey: key))
@@ -71,6 +78,7 @@ final class SkipKeychainTests: XCTestCase {
         let key = "SkipKeychainTestsIntKey"
         try skipRoboelectric()
         try skipiOSSimulator()
+        try skipNoKeychainPlatform()
         let keychain = Keychain.shared
         try keychain.removeValue(forKey: key)
         try XCTAssertNil(keychain.int(forKey: key))
@@ -82,6 +90,7 @@ final class SkipKeychainTests: XCTestCase {
         let key = "SkipKeychainTestsDoubleKey"
         try skipRoboelectric()
         try skipiOSSimulator()
+        try skipNoKeychainPlatform()
         let keychain = Keychain.shared
         try keychain.removeValue(forKey: key)
         try XCTAssertNil(keychain.double(forKey: key))
@@ -93,6 +102,12 @@ final class SkipKeychainTests: XCTestCase {
         if isRobolectric {
             throw XCTSkip("Roboelectric does not support AndroidKeyStore")
         }
+    }
+
+    private func skipNoKeychainPlatform() throws {
+        #if !SKIP && !canImport(Security)
+        throw XCTSkip("Keychain is not supported on this platform")
+        #endif
     }
 
     private func skipiOSSimulator() throws {
